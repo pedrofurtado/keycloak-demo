@@ -1,0 +1,23 @@
+### Generate access code
+POST http://localhost:8080/realms/my-company/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+username=bob
+&password=bob_password
+&grant_type=password
+&client_id=my-node-app
+
+### Generate access code AND openid
+POST http://localhost:8080/realms/my-company/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+username=bob
+&password=bob_password
+&grant_type=password
+&client_id=my-node-app
+&scope=openid
+
+###
+GET http://localhost:8080/realms/my-company/protocol/openid-connect/certs
+
+GET http://localhost:8080/realms/my-company/.well-known/openid-configuration
