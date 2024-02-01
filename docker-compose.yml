@@ -1,5 +1,14 @@
 version: '3'
 services:
+  my_sinatra_app:
+    restart: always
+    image: ruby:3.0.4
+    ports:
+      - 3006:9292
+    working_dir: /app
+    volumes:
+      - ./my-sinatra-app:/app
+    command: /bin/bash -c "bundle install && bundle exec rackup --host 0.0.0.0"
   my_node_app:
     restart: always
     image: node:16

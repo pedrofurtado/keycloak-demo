@@ -804,8 +804,8 @@
       "id": "62472861-fb9c-4dac-8ba2-a03ec79d6806",
       "clientId": "my-sinatra-app",
       "name": "my-sinatra-app",
-      "description": "",
-      "rootUrl": "",
+      "description": "My-sinatra-app runs at localhost:3006. The root URL is necessary to Authorization code flow works.",
+      "rootUrl": "http://localhost:3006",
       "adminUrl": "",
       "baseUrl": "",
       "surrogateAuthRequired": false,
@@ -830,9 +830,10 @@
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
-        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
