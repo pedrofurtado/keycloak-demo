@@ -96,16 +96,21 @@ get '/login' do
   redirect '/admin' if user_is_logged_in?
 
   nonce = SecureRandom.hex(10)
+  state_csrf = SecureRandom.hex(10)
 
-  # medidas de segurança (nonce) para evitar man-in-the-middle attacks
+  # medidas de segurança (nonce e state_csrf) para evitar man-in-the-middle attacks
+  # nonce = protege contra ataques de "replay" (gerar o msm access token mais de uma vez)
+  # state = protege contra xrsf attack (qdo um atacante gera uma request fora do "fluxo normal")
   session['nonce'] = nonce
+  session['state_csrf'] = state_csrf
 
   query_string_params = URI.encode_www_form({
     client_id: MY_SINATRA_APP_CONFIG.client_id,
     redirect_uri: "#{MY_SINATRA_APP_CONFIG.my_sinatra_app_base_url}/callback",
     response_type: 'code',
     scope: 'openid', # com scope=openid, vem o id_token na response do Keycloak
-    nonce: nonce
+    nonce: nonce,
+    state: state_csrf
   })
 
   redirect "#{MY_SINATRA_APP_CONFIG.keycloak_public_url}/realms/#{MY_SINATRA_APP_CONFIG.realm}/protocol/openid-connect/auth?#{query_string_params}"
@@ -135,6 +140,10 @@ get '/callback' do
   redirect('/admin') if user_is_logged_in?
 
   content_type :json
+
+  if params['state'] != session['state_csrf']
+    halt 524, { message: "state_csrf invalido | #{params['state']} vs #{session['state_csrf']}" }.to_json
+  end
 
   bodyParams = {
     client_id: MY_SINATRA_APP_CONFIG.client_id,
