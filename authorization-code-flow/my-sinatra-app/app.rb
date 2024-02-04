@@ -5,16 +5,20 @@ require 'uri'
 require 'jwt'
 require 'securerandom'
 require 'date'
+require 'redis-store'
+require 'rack'
+require 'redis-rack'
 
 configure do
   enable :reloader
-  enable :sessions
 end
+
+use Rack::Session::Redis, redis_server: 'redis://sessions_sinatra:6379/0'
 
 MY_SINATRA_APP_CONFIG = OpenStruct.new(
   realm: 'my-company',
-  keycloak_public_url: 'http://localhost:8080',
-  keycloak_docker_internal_url: 'http://keycloak_server:8080',
+  keycloak_public_url: 'https://2ae3-177-33-138-202.ngrok-free.app', # run ngrok http 8080. You MUST go to page 'http://localhost:8080/admin/master/console/#/my-company/realm-settings', in field 'Frontend URL' and put the ngrok URL to make work the refresh token endpoint.
+  keycloak_docker_internal_url: 'https://2ae3-177-33-138-202.ngrok-free.app',
   my_sinatra_app_base_url: 'http://localhost:3006',
   client_id: 'my-sinatra-app'
 )
@@ -26,7 +30,7 @@ end
 def verify_user_has_permission!(permission)
   return halt(401, 'nao autorizado pois nao esta logado') if !user_is_logged_in?
 
-  sinatra_roles_list = session['keycloak_jwt_access_token']['resource_access'][MY_SINATRA_APP_CONFIG.client_id]
+  sinatra_roles_list = JWT.decode(session['keycloak_jwt_access_token'], nil, false)[0]['resource_access'][MY_SINATRA_APP_CONFIG.client_id]
   return halt(401, 'nao autorizado pq nao tem roles para o client_id da app') if !sinatra_roles_list || sinatra_roles_list.nil?
 
   roles = sinatra_roles_list['roles']
@@ -38,6 +42,38 @@ end
 def session_clear
   session['keycloak_jwt_raw_id_token'] = nil
   session['keycloak_jwt_access_token'] = nil
+  session['refresh_token'] = nil
+end
+
+def refresh_token_now
+  bodyParams = {
+    client_id: MY_SINATRA_APP_CONFIG.client_id,
+    grant_type: 'refresh_token',
+    refresh_token: session['refresh_token']
+  }
+
+  url = "#{MY_SINATRA_APP_CONFIG.keycloak_docker_internal_url}/realms/#{MY_SINATRA_APP_CONFIG.realm}/protocol/openid-connect/token"
+
+  res = Net::HTTP.post_form(URI(url), bodyParams)
+
+  if res.code == '200' && res.body != ''
+    session['keycloak_jwt_raw_id_token'] = JSON.parse(res.body)['id_token']
+    session['keycloak_jwt_access_token'] = JSON.parse(res.body)['access_token']
+    session['refresh_token'] = JSON.parse(res.body)['refresh_token']
+  end
+
+  res
+end
+
+def token_refreshed?
+  res = refresh_token_now
+  body = res.body != '' ? JSON.parse(res.body) : ''
+
+  if res.code == '200'
+    true
+  else
+    false
+  end
 end
 
 def user_is_logged_in?
@@ -49,13 +85,21 @@ def user_is_logged_in?
     return false
   end
 
+  jwt_access_token = JWT.decode(jwt_access_token, nil, false)[0]
+
   jwt_is_expired = Time.now.to_i >= jwt_access_token['exp']
   jwt_with_wrong_client = jwt_access_token['azp'] != MY_SINATRA_APP_CONFIG.client_id
 
   if jwt_is_expired
-    puts "JWT access token expired | Expired at #{Time.at(jwt_access_token['exp']).to_datetime}"
-    session_clear
-    false
+    puts "jwt expired, lets try to refresh it"
+
+    if !token_refreshed?
+      puts "JWT access token expired | refresh token expired too | Expired at #{Time.at(jwt_access_token['exp']).to_datetime}"
+      session_clear
+      false
+    else
+      true
+    end
   elsif jwt_with_wrong_client
     puts "JWT access token with wrong client | #{jwt_access_token['azp']} vs #{MY_SINATRA_APP_CONFIG.client_id}"
     session_clear
@@ -69,9 +113,21 @@ get '/' do
   "My sinatra app for keycloak demo"
 end
 
+get '/refresh-token-now' do
+  content_type :json
+  res = refresh_token_now
+  { code: res.code, body: JSON.parse(res.body)}.to_json
+end
+
 get '/my-session' do
   content_type :json
-  session.inspect.gsub("=>", ":").gsub(":nil", ":null")
+  {
+    nonce: session['nonce'],
+    state_csrf: session['state_csrf'],
+    acc_token: session['keycloak_jwt_access_token'],
+    refresh_token: session['refresh_token'],
+    id_token: session['keycloak_jwt_raw_id_token']
+  }.to_json
 end
 
 get '/session-clear-for-debug' do
@@ -82,14 +138,16 @@ end
 get '/admin' do
   verify_user_is_logged_in!
   content_type :json
-  "You are authenticated as #{session['keycloak_jwt_access_token']['name']} (#{session['keycloak_jwt_access_token']['email']})"
+  jwt = JWT.decode(session['keycloak_jwt_access_token'], nil, false)[0]
+  "You are authenticated as #{jwt['name']} (#{jwt['email']})"
 end
 
 get '/admin-delete' do
   verify_user_is_logged_in!
   verify_user_has_permission! 'delete-records'
   content_type :json
-  "Admin-delete || You are authenticated as #{session['keycloak_jwt_access_token']['name']} (#{session['keycloak_jwt_access_token']['email']})"
+  jwt = JWT.decode(session['keycloak_jwt_access_token'], nil, false)[0]
+  "Admin-delete || You are authenticated as #{jwt['name']} (#{jwt['email']})"
 end
 
 get '/login' do
@@ -169,7 +227,8 @@ get '/callback' do
      halt 527, { message: "nonce invalido | #{jwt_access_token['nonce']} vs #{jwt_refresh_token['nonce']} vs #{jwt_id_token['nonce']} vs #{session['nonce']}" }.to_json
   end
 
-  session['keycloak_jwt_access_token'] = jwt_access_token
+  session['keycloak_jwt_access_token'] = body['access_token']
+  session['refresh_token'] = body['refresh_token']
   session['keycloak_jwt_raw_id_token'] = body['id_token']
 
   redirect '/logged_in'

@@ -1,5 +1,8 @@
 version: '3'
 services:
+  sessions_sinatra:
+    image: redis:7.0-alpine
+    restart: always
   my_sinatra_app:
     restart: always
     image: ruby:3.0.4
