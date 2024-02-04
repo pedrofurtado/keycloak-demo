@@ -397,6 +397,53 @@
           "attributes": {}
         }
       ],
+      "my-react-app": [
+        {
+          "id": "87643e81-2b0f-4e18-9452-dc77026e3493",
+          "name": "create-data",
+          "description": "Create data in my-react-app",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+          "attributes": {}
+        },
+        {
+          "id": "cd661434-ea4d-498e-8980-89bbf4e6814f",
+          "name": "delete-data",
+          "description": "Delete data in my-react-app",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+          "attributes": {}
+        },
+        {
+          "id": "6ee08371-e3ee-4234-bc5e-f87435ba9598",
+          "name": "view-data",
+          "description": "View data in my-react-app",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+          "attributes": {}
+        },
+        {
+          "id": "79a60f2f-e14b-4835-a9ef-1f4eadfd1821",
+          "name": "update-data",
+          "description": "Update data in my-react-app",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+          "attributes": {}
+        },
+        {
+          "id": "a7a32498-da21-4991-8880-527a8030cfa0",
+          "name": "list-data",
+          "description": "List data in my-react-app",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+          "attributes": {}
+        }
+      ],
       "broker": [
         {
           "id": "44b12906-ed07-4012-96dc-b72fdfc64854",
@@ -772,6 +819,59 @@
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "+",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "display.on.consent.screen": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "724d7807-eb19-4743-8665-a5cf5de51a6b",
+      "clientId": "my-react-app",
+      "name": "my-react-app",
+      "description": "My-react-app runs at localhost:3018. It uses the Implicit flow",
+      "rootUrl": "http://localhost:3018",
+      "adminUrl": "http://localhost:3018",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": true,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://localhost:3018/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3018"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "publicClient": true,
       "frontchannelLogout": true,
@@ -1559,14 +1659,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-full-name-mapper",
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
             "saml-user-attribute-mapper",
-            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-full-name-mapper",
+            "saml-role-list-mapper",
             "saml-user-property-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-usermodel-property-mapper"
           ]
         }
       },
@@ -1605,14 +1705,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-property-mapper",
-            "oidc-full-name-mapper",
             "saml-user-property-mapper",
             "saml-user-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
             "oidc-address-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-role-list-mapper"
+            "oidc-usermodel-property-mapper"
           ]
         }
       },
