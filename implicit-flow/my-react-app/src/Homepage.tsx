@@ -1,3 +1,3 @@
 export function Homepage() {
-  return <div>homepage</div>;
+  return <div>homepage - implicit flow</div>;
 }

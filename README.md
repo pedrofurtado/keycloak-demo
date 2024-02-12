@@ -12,10 +12,17 @@ Referencia: https://github.com/devfullcycle/fc-keycloak
 - Usa esse jwt para autenticar ele nas requests
 - nao serve pra SPA
 
-## Implicit flow
+## Implicit flow (authorization code flow sem "code" e sem "refresh token")
 
 - Serve pra qdo a app é apenas SPA, nao tem servidor backend
 - O keycloack envia no callback os dados via parametro hash na URL "#" ("#" é um search param na URL). Isso faz com que nao apareça em logs e debugs no browsers, para algum atacante usar
 - nao tem refresh token
+- Analogia: ImplicitFlow é o Authorization code flow só q sem a troca de um authorization code para um access_token, pois no callback ja vem direto o access_token. Alem disso, é um authorization code flow sem o refresh token
+
+## Hybrid flow (junção de Implicit flow + authorization code flow)
+
+- Analogia: Implicit flow + authorization code flow
+- Ao gerar a URL de redirect pro login, adicionamos no response_type a opcao "code", para trazer o authorization code nos dados do callback.
+- Cenario de uso: SPA que pega via Implicit flow os tokens iniciais, e em background (enquanto usuario navega pela app), a spa faz a request pro keycloack pra trocar os tokens para novos tokens (via authorization code recebido no callback). Assim, vc garante a performance de obtenção do primeiro token, e garante maior segurança por invalida-los rapidamente na segunda troca de tokens, ai sim via authorization code (analogo ao que é feito no Authorization code)
 
 https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/sso-protocols/oidc.html
