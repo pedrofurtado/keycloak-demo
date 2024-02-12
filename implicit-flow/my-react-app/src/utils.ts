@@ -17,7 +17,7 @@ export function makeLoginUrl() {
     state: state,
   });
 
-  return `http://localhost:8080/realms/my-company/protocol/openid-connect/auth?${loginUrlParams.toString()}`;
+  return `https://43df-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/auth?${loginUrlParams.toString()}`;
 }
 
 export function login(accessToken: string, idToken: string, state: string) {
@@ -69,17 +69,16 @@ export function makeLogoutUrl() {
     return false;
   }
   const logoutParams = new URLSearchParams({
-    //client_id: "fullcycle-client",
+    client_id: "my-react-app",
     id_token_hint: Cookies.get("id_token") as string,
-    post_logout_redirect_uri: "http://localhost:3018/login",
+    post_logout_redirect_uri: "http://localhost:3018/",
   });
 
   Cookies.remove("access_token");
   Cookies.remove("id_token");
   Cookies.remove("nonce");
   Cookies.remove("state");
+  Cookies.remove('keycloack_callback_params');
 
-  return `http://localhost:8080/realms/my-company/protocol/openid-connect/logout?${logoutParams.toString()}`;
+  return `https://43df-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/logout?${logoutParams.toString()}`;
 }
-
-//http://localhost:3018/callback#error=unauthorized_client&error_description=Client+is+not+allowed+to+initiate+browser+login+with+given+response_type.+Implicit+flow+is+disabled+for+the+client.&state=0.qka67jgt2m

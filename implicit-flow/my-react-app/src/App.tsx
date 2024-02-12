@@ -1,4 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Homepage } from "./Homepage";
 import { Login } from "./Login";
 import { Logout } from "./Logout";
 import { Callback } from "./Callback";
@@ -7,6 +8,10 @@ import { Admin } from "./Admin";
 import { PrivateRoute } from "./PrivateRoute";
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Homepage />,
+  },
   {
     path: "login",
     element: <Login />,

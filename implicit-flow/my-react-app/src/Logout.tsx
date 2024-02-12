@@ -10,5 +10,5 @@ export function Logout() {
     }
   }, [makeLogoutUrl]);
 
-  return <div>Loading...</div>;
+  return <div>Loading logout...</div>;
 }

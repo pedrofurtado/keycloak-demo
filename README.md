@@ -15,7 +15,7 @@ Referencia: https://github.com/devfullcycle/fc-keycloak
 ## Implicit flow
 
 - Serve pra qdo a app é apenas SPA, nao tem servidor backend
-- O callback envia os dados via parametro hash na URL "#" ("#" é um search param na URL). Isso faz com que nao apareça em logs e debugs no browsers, para algum atacante usar
-
+- O keycloack envia no callback os dados via parametro hash na URL "#" ("#" é um search param na URL). Isso faz com que nao apareça em logs e debugs no browsers, para algum atacante usar
+- nao tem refresh token
 
 https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/sso-protocols/oidc.html

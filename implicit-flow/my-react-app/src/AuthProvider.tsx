@@ -10,7 +10,7 @@ type AuthContextProps = {
 };
 
 const initContextData: AuthContextProps = {
-  auth: null,
+  auth: null, // indica se esta logado ou nao
   makeLoginUrl: utils.makeLoginUrl,
   //@ts-expect-error - this is a mock function
   // eslint-disable-next-line @typescript-eslint/no-empty-function
