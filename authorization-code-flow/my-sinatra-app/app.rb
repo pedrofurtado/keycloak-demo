@@ -17,10 +17,11 @@ use Rack::Session::Redis, redis_server: 'redis://sessions_sinatra:6379/0'
 
 MY_SINATRA_APP_CONFIG = OpenStruct.new(
   realm: 'my-company',
-  keycloak_public_url: 'https://2ae3-177-33-138-202.ngrok-free.app', # run ngrok http 8080. You MUST go to page 'http://localhost:8080/admin/master/console/#/my-company/realm-settings', in field 'Frontend URL' and put the ngrok URL to make work the refresh token endpoint.
-  keycloak_docker_internal_url: 'https://2ae3-177-33-138-202.ngrok-free.app',
+  keycloak_public_url: 'https://43df-177-33-138-202.ngrok-free.app', # run ngrok http 8080. You MUST go to page 'http://localhost:8080/admin/master/console/#/my-company/realm-settings', in field 'Frontend URL' and put the ngrok URL to make work the refresh token endpoint.
+  keycloak_docker_internal_url: 'https://43df-177-33-138-202.ngrok-free.app',
   my_sinatra_app_base_url: 'http://localhost:3006',
-  client_id: 'my-sinatra-app'
+  client_id: 'my-sinatra-app',
+  client_secret: 'DAq1AXRkVvPXZh8ogcVXJ8ifnTYWFGlW'
 )
 
 def verify_user_is_logged_in!
@@ -48,6 +49,7 @@ end
 def refresh_token_now
   bodyParams = {
     client_id: MY_SINATRA_APP_CONFIG.client_id,
+    client_secret: MY_SINATRA_APP_CONFIG.client_secret,
     grant_type: 'refresh_token',
     refresh_token: session['refresh_token']
   }
@@ -109,6 +111,28 @@ def user_is_logged_in?
   end
 end
 
+def verify_jwt_signature!(jwts)
+  access_token = JWT.decode(jwts['access_token'], nil, false)
+  refresh_token = JWT.decode(jwts['refresh_token'], nil, false)
+  id_token = JWT.decode(jwts['id_token'], nil, false)
+
+  url = "#{MY_SINATRA_APP_CONFIG.keycloak_docker_internal_url}/realms/#{MY_SINATRA_APP_CONFIG.realm}/protocol/openid-connect/certs"
+
+  res = Net::HTTP.get_response(URI(url))
+
+  if res.code == '200' && res.body != ''
+    certs = JSON.parse(res.body)
+
+    # so e possivel validar a assinatura do access_token e id_token. o refresh token nao usa uma key q o keycloak permita buscar via API.
+    [{ 'parsed_headers' => access_token[1], 'parsed_payload' => access_token[0], 'raw' => jwts['access_token'] }, { 'parsed_headers' => id_token[1], 'parsed_payload' => id_token[0], 'raw' => jwts['id_token'] }].each do |token|
+      # https://stackoverflow.com/a/73750800
+      JWT.decode(token['raw'], nil, true, { algorithms: [token['parsed_headers']['alg']], jwks: certs})
+    end
+  else
+    halt(500, 'Keycloak certs is unavailable')
+  end
+end
+
 get '/' do
   "My sinatra app for keycloak demo"
 end
@@ -164,6 +188,7 @@ get '/login' do
 
   query_string_params = URI.encode_www_form({
     client_id: MY_SINATRA_APP_CONFIG.client_id,
+    client_secret: MY_SINATRA_APP_CONFIG.client_secret,
     redirect_uri: "#{MY_SINATRA_APP_CONFIG.my_sinatra_app_base_url}/callback",
     response_type: 'code',
     scope: 'openid', # com scope=openid, vem o id_token na response do Keycloak
@@ -185,6 +210,7 @@ get '/logout' do
 
   logoutParams = URI.encode_www_form({
     client_id: MY_SINATRA_APP_CONFIG.client_id,
+    client_secret: MY_SINATRA_APP_CONFIG.client_secret,
     id_token_hint: session['keycloak_jwt_raw_id_token'],
     post_logout_redirect_uri: "#{MY_SINATRA_APP_CONFIG.my_sinatra_app_base_url}/logout_done"
   })
@@ -195,6 +221,13 @@ get '/logout' do
 end
 
 get '/callback' do
+  ## Checagens
+  # - state
+  # - nonce
+  # - azp
+  # - tempo de expiração
+  # - signature
+  ##
   redirect('/admin') if user_is_logged_in?
 
   content_type :json
@@ -205,6 +238,7 @@ get '/callback' do
 
   bodyParams = {
     client_id: MY_SINATRA_APP_CONFIG.client_id,
+    client_secret: MY_SINATRA_APP_CONFIG.client_secret,
     grant_type: 'authorization_code',
     code: params['code'],
     redirect_uri: "#{MY_SINATRA_APP_CONFIG.my_sinatra_app_base_url}/callback"
@@ -226,6 +260,22 @@ get '/callback' do
      jwt_id_token['nonce'] != session['nonce']
      halt 527, { message: "nonce invalido | #{jwt_access_token['nonce']} vs #{jwt_refresh_token['nonce']} vs #{jwt_id_token['nonce']} vs #{session['nonce']}" }.to_json
   end
+
+  if jwt_access_token['azp'] != MY_SINATRA_APP_CONFIG.client_id ||
+    jwt_refresh_token['azp'] != MY_SINATRA_APP_CONFIG.client_id ||
+    jwt_id_token['azp'] != MY_SINATRA_APP_CONFIG.client_id
+    halt 528, { message: 'azp invalido, precisa bater com o client id' }.to_json
+  end
+
+  time_now = Time.now.to_i
+  jwt_is_expired = time_now >= jwt_access_token['exp'] || time_now >= jwt_refresh_token['exp'] || time_now >= jwt_id_token['exp']
+
+  if jwt_is_expired
+    halt 529, { message: 'token ja expirado' }.to_json
+  end
+
+  #verifica a assinatura do token bom base no kid do payload JWT do token (key id)
+  verify_jwt_signature!(body)
 
   session['keycloak_jwt_access_token'] = body['access_token']
   session['refresh_token'] = body['refresh_token']

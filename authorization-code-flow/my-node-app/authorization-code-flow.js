@@ -6,10 +6,11 @@ const app = express()
 
 const config = {
   realm: 'my-company',
-  keycloak_public_url: 'http://localhost:8080',
-  keycloak_docker_internal_url: 'http://keycloak_server:8080',
+  keycloak_public_url: 'https://43df-177-33-138-202.ngrok-free.app',
+  keycloak_docker_internal_url: 'https://43df-177-33-138-202.ngrok-free.app',
   my_node_app_base_url: 'http://localhost:3000',
-  client_id: 'my-node-app'
+  client_id: 'my-node-app',
+  client_secret: 'jLepuNGYIWYsEgblHXgq9G8W9qVnFv26'
 }
 
 app.get('/', (req, res) => {
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {
   const loginParams = new URLSearchParams({
     client_id: config.client_id,
+    client_secret: config.client_secret,
     redirect_uri: `${config.my_node_app_base_url}/callback`,
     response_type: 'code'
   })
@@ -31,6 +33,7 @@ app.get('/callback', async (req, res) => {
 
   const bodyParams = new URLSearchParams({
     client_id: config.client_id,
+    client_secret: config.client_secret,
     grant_type: 'authorization_code',
     code: req.query.code,
     redirect_uri: `${config.my_node_app_base_url}/callback`
