@@ -1,0 +1,20 @@
+version: '3'
+services:
+  my_node_app:
+    restart: always
+    image: node:16
+    working_dir: /app
+    volumes:
+      - ./my-node-app:/app
+    ports:
+      - 3009:3009
+    command: /bin/bash -c "npm install && npm run start:direct-grant"
+  keycloak_server:
+    restart: always
+    image: quay.io/keycloak/keycloak:23.0.4
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      - KEYCLOAK_ADMIN=keycloak_admin
+      - KEYCLOAK_ADMIN_PASSWORD=keycloak_admin
