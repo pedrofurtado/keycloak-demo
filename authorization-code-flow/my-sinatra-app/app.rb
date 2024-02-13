@@ -17,8 +17,8 @@ use Rack::Session::Redis, redis_server: 'redis://sessions_sinatra:6379/0'
 
 MY_SINATRA_APP_CONFIG = OpenStruct.new(
   realm: 'my-company',
-  keycloak_public_url: 'https://43df-177-33-138-202.ngrok-free.app', # run ngrok http 8080. You MUST go to page 'http://localhost:8080/admin/master/console/#/my-company/realm-settings', in field 'Frontend URL' and put the ngrok URL to make work the refresh token endpoint.
-  keycloak_docker_internal_url: 'https://43df-177-33-138-202.ngrok-free.app',
+  keycloak_public_url: 'https://4f43-177-33-138-202.ngrok-free.app', # run ngrok http 8080. You MUST go to page 'http://localhost:8080/admin/master/console/#/my-company/realm-settings', in field 'Frontend URL' and put the ngrok URL to make work the refresh token endpoint.
+  keycloak_docker_internal_url: 'https://4f43-177-33-138-202.ngrok-free.app',
   my_sinatra_app_base_url: 'http://localhost:3006',
   client_id: 'my-sinatra-app',
   client_secret: 'DAq1AXRkVvPXZh8ogcVXJ8ifnTYWFGlW'

@@ -21,8 +21,8 @@ app.use(
 
 const config = {
   realm: 'my-company',
-  keycloak_public_url: 'https://43df-177-33-138-202.ngrok-free.app',
-  keycloak_docker_internal_url: 'https://43df-177-33-138-202.ngrok-free.app',
+  keycloak_public_url: 'https://4f43-177-33-138-202.ngrok-free.app',
+  keycloak_docker_internal_url: 'https://4f43-177-33-138-202.ngrok-free.app',
   my_node_app_base_url: 'http://localhost:3000',
   client_id: 'my-node-app',
   client_secret: 'jLepuNGYIWYsEgblHXgq9G8W9qVnFv26'

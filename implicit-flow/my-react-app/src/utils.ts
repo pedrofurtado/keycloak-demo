@@ -17,7 +17,7 @@ export function makeLoginUrl() {
     state: state,
   });
 
-  return `https://43df-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/auth?${loginUrlParams.toString()}`;
+  return `https://4f43-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/auth?${loginUrlParams.toString()}`;
 }
 
 export function login(accessToken: string, idToken: string, state: string) {
@@ -80,5 +80,5 @@ export function makeLogoutUrl() {
   Cookies.remove("state");
   Cookies.remove('keycloack_callback_params');
 
-  return `https://43df-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/logout?${logoutParams.toString()}`;
+  return `https://4f43-177-33-138-202.ngrok-free.app/realms/my-company/protocol/openid-connect/logout?${logoutParams.toString()}`;
 }

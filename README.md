@@ -30,4 +30,9 @@ Referencia: https://github.com/devfullcycle/fc-keycloak
 - Quando a app "esconde" a autenticação do keycloak do usuario. A app obtem as infos de user+senha do usuario final (via formulario ou coisa do tipo), passa no backend para o Keycloak e obtem o access token, sem redirecionar o usuário para uma tela de login do Keycloak.
 - Apesar de tornar "transparente" o login (afinal, usuario nao fica sabendo que por debaixo dos panos ele foi pro Keycloak), nao permite uso de 2FA ou single sign on, pois nao tem a renderização de telas do Keycloak no meio do processo (a tela do Keycloak no meio do processo é o que justamente faz acontecer o SSO + 2FA + Confirmação por email + Troca de senha temporaria + etc).
 
+## Client Credentials Grant
+
+- Usado para fazer a autenticaão entre 2 microserviços backend.
+- Nesse fluxo, nao há browser nem usuário final (ser humano), e sim apenas apps backend comunicando e autenticando entre si
+
 https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/sso-protocols/oidc.html

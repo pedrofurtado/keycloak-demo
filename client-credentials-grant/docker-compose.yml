@@ -1,0 +1,32 @@
+version: '3'
+services:
+  cache_sinatra:
+    image: redis:7.0-alpine
+    restart: always
+  app_a:
+    restart: always
+    image: ruby:3.0.4
+    ports:
+      - 3010:9292
+    working_dir: /app
+    volumes:
+      - ./app-a:/app
+    command: /bin/bash -c "bundle install && bundle exec rackup --host 0.0.0.0"
+  app_b:
+    restart: always
+    image: ruby:3.0.4
+    ports:
+      - 3011:9292
+    working_dir: /app
+    volumes:
+      - ./app-b:/app
+    command: /bin/bash -c "bundle install && bundle exec rackup --host 0.0.0.0"
+  keycloak_server:
+    restart: always
+    image: quay.io/keycloak/keycloak:23.0.4
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      - KEYCLOAK_ADMIN=keycloak_admin
+      - KEYCLOAK_ADMIN_PASSWORD=keycloak_admin
